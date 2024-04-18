@@ -1,43 +1,43 @@
-const fs = require("node:fs/promises");
+import { nanoid } from "nanoid";
+import * as fs from "node:fs/promises";
+import path from "node:path";
+const contactsPath = path.resolve("bd", "contacts.json");
 
-const contactsPath = require("path").basename("./contacts.json");
-
-async function listContacts() {
+const writeContacts = (contacts) => {
+  return fs.writeFile(contactsPath, JSON.stringify(contacts, undefined, 2));
+};
+const listContacts = async () => {
   const contacts = await fs.readFile(contactsPath, { encoding: "utf-8" });
-  return contacts;
-}
+  return JSON.parse(contacts);
+};
 
-async function getContactById(contactId) {
+const getContactById = async (contactId) => {
   const contacts = await listContacts();
-  const parsedContacts = JSON.parse(contacts);
-  const contact = parsedContacts.find((contact) => contact.id === contactId);
+  const contact = contacts.find((contact) => contact.id === contactId);
   return contact || null;
-}
+};
 
-async function removeContact(contactId) {
+const removeContact = async (contactId) => {
   const contacts = await listContacts();
-  const parsedContacts = JSON.parse(contacts);
-  const filteredContacts = JSON.stringify(
-    parsedContacts.filter((contact) => contact.id !== contactId)
+  const filteredContacts = contacts.filter(
+    (contact) => contact.id !== contactId
   );
-  const contact = parsedContacts.find((contact) => contact.id === contactId);
-  await fs.writeFile(contactsPath, filteredContacts);
+  const contact = contacts.find((contact) => contact.id === contactId);
+  await writeContacts(filteredContacts);
   return contact || null;
-}
+};
 
-async function addContact(name, email, phone) {
+const addContact = async (name, email, phone) => {
   const contacts = await listContacts();
-  const parsedContacts = JSON.parse(contacts);
   const newContact = {
-    id: `${Date.now()}`,
+    id: crypto.randomUUID(),
     name,
     email,
     phone,
   };
-  parsedContacts.push(newContact);
-  const formattedContacts = JSON.stringify(parsedContacts);
-  await fs.writeFile(contactsPath, formattedContacts);
+  contacts.push(newContact);
+  await writeContacts(contacts);
   return newContact;
-}
+};
 
-module.exports = { listContacts, getContactById, removeContact, addContact };
+export { listContacts, getContactById, removeContact, addContact };

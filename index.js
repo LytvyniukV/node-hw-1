@@ -1,10 +1,10 @@
-const { program } = require("commander");
-const {
+import { program } from "commander";
+import {
   listContacts,
   getContactById,
   removeContact,
   addContact,
-} = require("./contacts.js");
+} from "./contacts.js";
 program
   .option("-a, --action <type>", "choose action")
   .option("-i, --id <type>", "user id")
@@ -12,7 +12,7 @@ program
   .option("-e, --email <type>", "user email")
   .option("-p, --phone <type>", "user phone");
 
-program.parse();
+program.parse(process.argv);
 
 const options = program.opts();
 
@@ -20,19 +20,23 @@ const options = program.opts();
 async function invokeAction({ action, id, name, email, phone }) {
   switch (action) {
     case "list":
-      listContacts().then((data) => console.table(data));
+      const contacts = await listContacts();
+      console.table(contacts);
       break;
 
     case "get":
-      getContactById(id).then((data) => console.log(data));
+      const contact = await getContactById(id);
+      console.log(contact);
       break;
 
     case "add":
-      addContact(name, email, phone).then((data) => console.log(data));
+      const newContact = await addContact(name, email, phone);
+      console.log(newContact);
       break;
 
     case "remove":
-      removeContact(id).then((data) => console.log(data));
+      const removedContact = await removeContact(id);
+      console.log(removedContact);
       break;
 
     default:
